@@ -1,18 +1,14 @@
-/* jshint node: true */
 'use strict';
 
 var path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
 var format = require('util').format;
-var browserify = require('browserify');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
+var webpack = require('webpack-stream');
 var del = require('del');
 var runSequence = require('run-sequence');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
-var collapser = require('bundle-collapser/plugin');
 var file = require('../lib/file');
 var cstmzPath = path.join(__dirname, '../../dist/customized');
 var cstmzTmp = path.join(__dirname, '../../.cstmz-tmp');
@@ -58,7 +54,7 @@ var less = [
   '@import "base.less";'
 ];
 var js = [
-  'require("core");'
+  'require("../../js/core");'
 ];
 
 gulp.task('customizer:preparing', function(callback) {
@@ -67,7 +63,7 @@ gulp.task('customizer:preparing', function(callback) {
   });
 
   config.js.forEach(function(file) {
-    js.push(format('require("%s");', file));
+    js.push(format('require("../../js/%s");', file));
   });
 
   // widgets
@@ -79,7 +75,11 @@ gulp.task('customizer:preparing', function(callback) {
     }
 
     config.widgets.forEach(function(widget) {
-      js.push(format('require("%s/src/%s");', widget.name, widget.name));
+      js.push(format(
+        'require("../../widget/%s/src/%s");',
+        widget.name,
+        widget.name)
+      );
       less.push(format('@import "../../widget/%s/src/%s.less";',
         widget.name, widget.name));
       var pkg = require(path.join('../../widget', widget.name, 'package.json'));
@@ -104,7 +104,7 @@ gulp.task('customizer:preparing', function(callback) {
 });
 
 gulp.task('customizer:less', function() {
-  gulp.src(DEFAULTS.less)
+  return gulp.src(DEFAULTS.less)
     .pipe($.less({
       paths: [
         path.join(__dirname, '../../less')
@@ -116,7 +116,10 @@ gulp.task('customizer:less', function() {
     }))
     .pipe(gulp.dest(cstmzPath))
     .pipe($.size({showFiles: true, title: 'source'}))
-    .pipe($.minifyCss({noAdvanced: true}))
+    .pipe($.cleanCss({
+      advanced: false,
+      compatibility: 'ie8'
+    }))
     .pipe($.rename({
       suffix: '.min',
       extname: '.css'
@@ -127,12 +130,24 @@ gulp.task('customizer:less', function() {
 });
 
 gulp.task('customizer:js', function() {
-  return browserify({
-    entries: DEFAULTS.js,
-    paths: [path.join(__dirname, '../../js'), path.join(__dirname, '../../widget')]
-  }).plugin(collapser).bundle()
-    .pipe(source('amazeui.custom.js'))
-    .pipe(buffer())
+  return gulp.src(DEFAULTS.js)
+    .pipe(webpack({
+      output: {
+        filename: 'amazeui.custom.js',
+        library: 'AMUI',
+        libraryTarget: 'umd'
+      },
+      externals: [
+        {
+          jquery: {
+            root: 'jQuery',
+            commonjs2: 'jquery',
+            commonjs: 'jquery',
+            amd: 'jquery'
+          }
+        }
+      ]
+    }))
     .pipe(gulp.dest(cstmzPath))
     .pipe($.uglify({
       output: {
@@ -145,8 +160,8 @@ gulp.task('customizer:js', function() {
     .pipe($.size({showFiles: true, gzip: true, title: 'gzipped'}));
 });
 
-gulp.task('customizer:clean', function(cb) {
-  del(DEFAULTS.tmp, cb);
+gulp.task('customizer:clean', function() {
+  return del(DEFAULTS.tmp);
 });
 
 gulp.task('customizer', function(cb) {

@@ -35,6 +35,7 @@ Modal 交互窗口，可以用来模拟浏览器的 `alert`、`confirm`、`promp
       <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
     </div>
     <div class="am-modal-bd">
+      <button class="am-btn am-btn-primary am-fr am-margin-left" data-am-popover="{content: '谁愿压抑心中怒愤冲动，咒骂这虚与伪与假'}">点击显示 Popover</button>
       Modal 内容。本 Modal 无法通过遮罩层关闭。
     </div>
   </div>
@@ -224,12 +225,12 @@ $(function() {
 
 **存在问题：**
 
-出于性能考虑，每个 Modal 实例都存储在对应元素的 `$('.am-modal').data('am.modal')` 属性中，`onConfirm`/`onCancel` 会保存第一次运行 Modal 时候的数据，导致在某些场景不能按照预期工作（[#274](https://github.com/allmobilize/amazeui/issues/274#issuecomment-65182344)）。`2.1` 中做了一些处理，但并不是很如意，大家有更好的方案可以提供给我们。
+出于性能考虑，每个 Modal 实例都存储在对应元素的 `$('.am-modal').data('amui.modal')` 属性中，`onConfirm`/`onCancel` 会保存第一次运行 Modal 时候的数据，导致在某些场景不能按照预期工作（[#274](https://github.com/allmobilize/amazeui/issues/274#issuecomment-65182344)）。`2.1` 中做了一些处理，但并不是很如意，大家有更好的方案可以提供给我们。
 
 可以选择的处理方式：
 
 - **法一**：通过 `relatedTarget` 这个钩子获取数据，如上面的演示，以该元素为桥梁获取想要的数据（**2.1 开始支持**）；
-- 法二：按照[**这种方式**](http://jsbin.com/fahawe/1/edit?html,output) 每次都重新给这两个参数赋值；
+- 法二：按照[**这种方式**](http://jsbin.com/fahawe/edit?html,output) 每次都重新给这两个参数赋值；
 - 法三：Confirm 关闭后移除暂存的实例，再次调用时重新初始化；
 
 ```javascript
@@ -566,56 +567,16 @@ $(function() {
 
 #### 参数说明
 
-<table class="am-table am-table-bordered am-table-striped">
-  <thead>
-  <tr>
-    <th>参数</th>
-    <th>类型</th>
-    <th>描述</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td><code>onConfirm</code></td>
-    <td><code>function</code></td>
-    <td>具有 <code>data-am-modal-confirm</code> 属性的按钮关闭时触发的函数</td>
-  </tr>
-  <tr>
-    <td><code>closeOnConfirm</code></td>
-    <td><code>bool</code></td>
-    <td>具有 <code>data-am-modal-confirm</code> 属性的按钮点击时是否关闭 Modal，默认为 <code>true</code>
-    （<strong>v2.4.1 新增</strong>）
-    </td>
-  </tr>
-  <tr>
-    <td><code>onCancel</code></td>
-    <td><code>function</code></td>
-    <td>具有 <code>data-am-modal-cancel</code> 属性的按钮关闭时触发的函数</td>
-  </tr>
-  <tr>
-    <td><code>closeOnCancel</code></td>
-    <td><code>bool</code></td>
-    <td>具有 <code>data-am-modal-cancel</code> 属性的按钮点击时是否关闭 Modal，默认为 <code>true</code>
-      （<strong>v2.4.1 新增</strong>）
-    </td>
-  </tr>
-  <tr>
-    <td><code>closeViaDimmer</code></td>
-    <td><code>boolean</code></td>
-    <td>点击遮罩层时关闭 Modal，默认为 <code>true</code></td>
-  </tr>
-  <tr>
-    <td><code>width</code></td>
-    <td><code>number</code></td>
-    <td>Modal 宽度，对 Popup 和 Actions 无效</td>
-  </tr>
-  <tr>
-    <td><code>height</code></td>
-    <td><code>number</code></td>
-    <td>Modal 高度，对 Popup 和 Actions 无效</td>
-  </tr>
-  </tbody>
-</table>
+| 参数 | 类型 | 描述 |
+| ----| --- | --- |
+| `onConfirm` | `function` | 具有 <code>data-am-modal-confirm</code> 属性的按钮关闭时触发的函数 |
+| `closeOnConfirm` | `bool` | 具有 <code>data-am-modal-confirm</code> 属性的按钮点击时是否关闭 Modal，默认为 <code>true</code>（<strong>v2.4.1 新增</strong>）|
+| `onCancel` | `function` | 具有 <code>data-am-modal-cancel</code> 属性的按钮关闭时触发的函数 |
+| `closeOnCancel` | `bool` | 具有 <code>data-am-modal-cancel</code> 属性的按钮点击时是否关闭 Modal，默认为 <code>true</code>（<strong>v2.4.1 新增</strong>）|
+| `closeViaDimmer` | `bool` | 点击遮罩层时关闭 Modal，默认为 `true` |
+| `width` | `number` | Modal 宽度，对 Popup 和 Actions 无效 |
+| `height`| `number` | Modal 高度，对 Popup 和 Actions 无效 |
+| `dimmer` | `bool` | 是否显示 Modal 遮罩背景，默认为 `true` (**v2.5**)|
 
 **注意：**
 

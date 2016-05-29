@@ -25,6 +25,10 @@ var Modal = function(element, options) {
   this.isPrompt = this.$element.hasClass('am-modal-prompt');
   this.isLoading = this.$element.hasClass('am-modal-loading');
   this.active = this.transitioning = this.relatedTarget = null;
+  this.dimmer = this.options.dimmer ? dimmer : {
+    open: function() {},
+    close: function() {}
+  };
 
   this.events();
 };
@@ -46,6 +50,7 @@ Modal.DEFAULTS = {
   },
   closeOnCancel: true,
   closeOnConfirm: true,
+  dimmer: true,
   height: undefined,
   width: undefined,
   duration: 300, // must equal the CSS transition duration
@@ -79,7 +84,8 @@ Modal.prototype.open = function(relatedTarget) {
   if (this.transitioning) {
     clearTimeout($element.transitionEndTimmer);
     $element.transitionEndTimmer = null;
-    $element.trigger(options.transitionEnd).off(options.transitionEnd);
+    $element.trigger(options.transitionEnd)
+      .off(options.transitionEnd);
   }
 
   isPopup && this.$element.show();
@@ -88,42 +94,33 @@ Modal.prototype.open = function(relatedTarget) {
 
   $element.trigger($.Event('open.modal.amui', {relatedTarget: relatedTarget}));
 
-  dimmer.open($element);
+  this.dimmer.open($element);
 
   $element.show().redraw();
 
   // apply Modal width/height if set
   if (!isPopup && !this.isActions) {
     if (width) {
-      width = parseInt(width, 10);
-      style.width =  width + 'px';
-      style.marginLeft =  -parseInt(width / 2) + 'px';
+      style.width =  parseInt(width, 10) + 'px';
     }
 
     if (height) {
-      height = parseInt(height, 10);
-      // style.height = height + 'px';
-      style.marginTop = -parseInt(height / 2) + 'px';
-
-      // the background color is styled to $dialog
-      // so the height should set to $dialog
-      this.$dialog.css({height: height + 'px'});
-    } else {
-      style.marginTop = -parseInt($element.height() / 2, 10) + 'px';
+      style.height = parseInt(height, 10) + 'px';
     }
 
-    $element.css(style);
+    this.$dialog.css(style);
   }
 
-  $element.
-    removeClass(options.className.out).
-    addClass(options.className.active);
+  $element
+    .removeClass(options.className.out)
+    .addClass(options.className.active);
 
   this.transitioning = 1;
 
   var complete = function() {
-    $element.trigger($.Event('opened.modal.amui',
-      {relatedTarget: relatedTarget}));
+    $element.trigger(
+      $.Event('opened.modal.amui', {relatedTarget: relatedTarget})
+    );
     this.transitioning = 0;
 
     // Prompt auto focus
@@ -136,9 +133,9 @@ Modal.prototype.open = function(relatedTarget) {
     return complete.call(this);
   }
 
-  $element.
-    one(options.transitionEnd, $.proxy(complete, this)).
-    emulateTransitionEnd(options.duration);
+  $element
+    .one(options.transitionEnd, $.proxy(complete, this))
+    .emulateTransitionEnd(options.duration);
 };
 
 Modal.prototype.close = function(relatedTarget) {
@@ -155,7 +152,7 @@ Modal.prototype.close = function(relatedTarget) {
     clearTimeout($element.transitionEndTimmer);
     $element.transitionEndTimmer = null;
     $element.trigger(options.transitionEnd).off(options.transitionEnd);
-    dimmer.close($element, true);
+    this.dimmer.close($element, true);
   }
 
   this.$element.trigger($.Event('close.modal.amui',
@@ -169,7 +166,7 @@ Modal.prototype.close = function(relatedTarget) {
     $element.hide();
     this.transitioning = 0;
     // 不强制关闭 Dimmer，以便多个 Modal 可以共享 Dimmer
-    dimmer.close($element, false);
+    this.dimmer.close($element, false);
     this.active = false;
   };
 
@@ -180,8 +177,8 @@ Modal.prototype.close = function(relatedTarget) {
     return complete.call(this);
   }
 
-  $element.one(options.transitionEnd, $.proxy(complete, this)).
-    emulateTransitionEnd(options.duration);
+  $element.one(options.transitionEnd, $.proxy(complete, this))
+    .emulateTransitionEnd(options.duration);
 };
 
 Modal.prototype.events = function() {
@@ -212,15 +209,14 @@ Modal.prototype.events = function() {
   }
 
   // Close Modal when dimmer clicked
-  if (this.options.closeViaDimmer && !this.isLoading) {
-    dimmer.$element.on('click.dimmer.modal.amui', function(e) {
+  if (this.options.dimmer && this.options.closeViaDimmer && !this.isLoading) {
+    this.dimmer.$element.on('click.dimmer.modal.amui', function(e) {
       _this.close();
     });
   }
 
   // Close Modal when button clicked
-  $element.find('[data-am-modal-close], .am-modal-btn').
-    on('click.close.modal.amui', function(e) {
+  $element.on('click.close.modal.amui', '[data-am-modal-close], .am-modal-btn', function(e) {
       e.preventDefault();
       var $this = $(this);
 
