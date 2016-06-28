@@ -114,10 +114,6 @@ Selected.prototype.init = function() {
   // set select button styles
   this.$selector.css({width: this.options.btnWidth});
 
-  if (this.$element[0].disabled) {
-    this.$selector.addClass(options.disabledClass);
-  }
-
   this.$list = this.$selector.find('.am-selected-list');
   this.$searchField = this.$selector.find('.am-selected-search input');
   this.$hint = this.$selector.find('.am-selected-hint');
@@ -132,6 +128,12 @@ Selected.prototype.init = function() {
   this.$selector.dropdown({
     justify: $selectorBtn
   });
+
+  // disable Selected instance if <selected> is disabled
+  // should call .disable() after Dropdown initialed
+  if ($element[0].disabled) {
+    this.disable();
+  }
 
   // set list height
   if (options.maxHeight) {
@@ -272,7 +274,7 @@ Selected.prototype.setChecked = function(item) {
  * syncData
  *
  * @description if `item` set, only sync `item` related option
- * @param {Object} item
+ * @param {Object} [item]
  */
 Selected.prototype.syncData = function(item) {
   var _this = this;
@@ -353,7 +355,6 @@ Selected.prototype.bindEvents = function() {
 
     this.observer.observe(this.$element[0], {
       childList: true,
-      attributes: true,
       subtree: true,
       characterData: true
     });
@@ -379,19 +380,19 @@ Selected.prototype.select = function(item) {
   }
 
   $item.trigger('click');
-},
+};
 
 // @since: 2.5
 Selected.prototype.enable = function() {
   this.$element.prop('disable', false);
   this.$selector.dropdown('enable');
-},
+};
 
 // @since: 2.5
 Selected.prototype.disable = function() {
   this.$element.prop('disable', true);
   this.$selector.dropdown('disable');
-},
+};
 
 Selected.prototype.destroy = function() {
   this.$element.removeData('amui.selected').show();

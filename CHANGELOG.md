@@ -1,6 +1,33 @@
 # Amaze UI Change Log
 ---
 
+
+
+
+### 2016.06 W3
+
+**JS**:
+
+- `Fixed` 修复 ScrollSpyNav 自动初始化 API 和参数 API 不一致问题，统一为 `data-am-scrollspynav`;
+- `Fixed` Selected 初始化时，没有正确处理 `<select>` 元素的 `disabled`  属性。
+
+
+### 2016.06 W2
+
+**CSS**:
+
+- `Improved` #868 处理 `date`/`datetime-local` 类型的 `input` 在较旧版本 Safari 等浏览器上高度与其他类型的输入框不一致问题。
+
+**JS**:
+
+- `Fixed` #880 Selected `change` 事件在支持 MutationObserver 的浏览器上无限触发问题。
+
+### 2016.06 W1
+
+**CSS**:
+
+- `Improved` #878 面包屑导航分隔符乱码问题。
+
 ## Amaze UI 2.7.0 (2016.05.24)
 
 **CSS**:
